@@ -48,17 +48,8 @@ app.get('/utilisateur/:id', async(req, res) =>{
     res.status(200).json(rows)
 })
 
+// LA ROUTE POUR L'INSCRIPTION VIENT ICI //
 
-app.post('/utilisateur', async(req,res) =>{
-    let conn;
-    console.log('Connexion');
-    conn = await mariadb.pool.getConnection();
-    console.log('Requète');
-    await conn.query('INSERT INTO compte(NomCompte, MdpCompte, MailCompte) VALUES (?,?,?)',[req.body.nom,req.body.mdp,req.body.mail])
-    const rows = await conn.query('SELECT * FROM compte;')    
-    console.log('Requète effectué');
-    res.status(200).json(rows)
-})
 
 app.put('/utilisateur/:id',async(req,res)=>{
     let conn;
@@ -67,6 +58,18 @@ app.put('/utilisateur/:id',async(req,res)=>{
     conn = await mariadb.pool.getConnection();
     console.log('Requète');
     await conn.query('UPDATE compte SET NomCompte = ?, MdpCompte = ?, CompteAdmin = ?, MailCompte = ? WHERE IdCompte = ?',[req.body.nom,req.body.mdp,req.body.admin,req.body.mail,id])
+    const rows = await conn.query('SELECT * FROM compte;')    
+    console.log('Requète effectué');
+    res.status(200).json(rows)
+})
+
+app.delete('/utilisateur/:id',async(req,res)=>{
+    let conn;
+    let id = req.params.id
+    console.log('Connexion');
+    conn = await mariadb.pool.getConnection();
+    console.log('Requète');
+    await conn.query('DELETE FROM compte WHERE IdCompte = ?',[id])
     const rows = await conn.query('SELECT * FROM compte;')    
     console.log('Requète effectué');
     res.status(200).json(rows)
@@ -83,17 +86,6 @@ app.post('/produit',async(req,res)=>{
     res.status(200).json(rows)
 })
 
-app.delete('/utilisateur/:id',async(req,res)=>{
-    let conn;
-    let id = req.params.id
-    console.log('Connexion');
-    conn = await mariadb.pool.getConnection();
-    console.log('Requète');
-    await conn.query('DELETE FROM compte WHERE IdCompte = ?',[id])
-    const rows = await conn.query('SELECT * FROM compte;')    
-    console.log('Requète effectué');
-    res.status(200).json(rows)
-})
 
 app.put('/produit/:id',async(req,res)=>{
     let conn;
