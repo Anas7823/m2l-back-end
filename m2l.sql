@@ -26,10 +26,14 @@ CREATE TABLE `compte` (
   `IdCompte` int(11) NOT NULL AUTO_INCREMENT,
   `NomCompte` varchar(50) NOT NULL,
   `MdpCompte` varchar(50) NOT NULL,
-  `CompteAdmin` tinyint(1) DEFAULT NULL,
+  `CompteAdmin` tinyint(1) DEFAULT 0,
   `MailCompte` varchar(50) NOT NULL,
-  PRIMARY KEY (`IdCompte`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `AdresseCompte` varchar(50) CHARACTER SET utf8mb3 NOT NULL,
+  PRIMARY KEY (`IdCompte`),
+  UNIQUE KEY `NomCompte` (`NomCompte`,`MailCompte`),
+  UNIQUE KEY `MailCompte` (`MailCompte`),
+  UNIQUE KEY `NomCompte_2` (`NomCompte`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,6 +42,12 @@ CREATE TABLE `compte` (
 
 LOCK TABLES `compte` WRITE;
 /*!40000 ALTER TABLE `compte` DISABLE KEYS */;
+INSERT INTO `compte` VALUES
+(1,'test','test',0,'Test1@gmail.com','1 Rue test, Verfication 69420'),
+(2,'test2','Test',0,'Test2@gmail','10 Rue Test'),
+(3,'test3','Test',0,'Test3@gmail','10 Rue Test'),
+(4,'test4','Test',0,'Test4@gmail','10 Rue Test'),
+(5,'test5','Test',0,'Test5@gmail','10 Rue Test');
 /*!40000 ALTER TABLE `compte` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -138,7 +148,7 @@ CREATE TABLE `produit` (
   PRIMARY KEY (`IdProduit`),
   KEY `IdSport` (`IdSport`),
   CONSTRAINT `produit_ibfk_1` FOREIGN KEY (`IdSport`) REFERENCES `sport` (`IdSport`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -203,4 +213,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-02 17:01:33
+-- Dump completed on 2022-12-16 16:24:35
