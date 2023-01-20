@@ -33,7 +33,7 @@ CREATE TABLE `compte` (
   UNIQUE KEY `NomCompte` (`NomCompte`,`MailCompte`),
   UNIQUE KEY `MailCompte` (`MailCompte`),
   UNIQUE KEY `NomCompte_2` (`NomCompte`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,11 +43,11 @@ CREATE TABLE `compte` (
 LOCK TABLES `compte` WRITE;
 /*!40000 ALTER TABLE `compte` DISABLE KEYS */;
 INSERT INTO `compte` VALUES
-(1,'test','test',0,'Test1@gmail.com','1 Rue test, Verfication 69420'),
 (2,'test2','Test',0,'Test2@gmail','10 Rue Test'),
 (3,'test3','Test',0,'Test3@gmail','10 Rue Test'),
 (4,'test4','Test',0,'Test4@gmail','10 Rue Test'),
-(5,'test5','Test',0,'Test5@gmail','10 Rue Test');
+(5,'test5','Test',0,'Test5@gmail','10 Rue Test'),
+(6,'sgfsdg','srgegvqsfzt',0,'sdfgdfbtyed@gmail.com','srgedfqet');
 /*!40000 ALTER TABLE `compte` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -168,12 +168,12 @@ INSERT INTO `produit` VALUES
 (8,'Pompe double action jaune noir',6,0,2),
 (9,'Jordan One Take 4',99.99,0,2),
 (10,'NBA DRV PLUS Outdoor',24.99,0,2),
-(17,'Gant de gardien - F100 Resist Noir Gris',10,0,1),
-(18,'Protège-Tibias Adidas Tiro Match Noirs',15,0,1),
-(19,'But de foot - Power Shot',74.99,0,1),
-(20,'Bâche de précision - Kipsta',20,0,1),
-(21,'Chaussure Predator EDGE.3 FG',90,0,1),
-(22,'Ballon Souvenir de la Ligue des Champions 2021',28.99,0,1);
+(11,'Gant de gardien - F100 Resist Noir Gris',10,0,1),
+(12,'Protège-Tibias Adidas Tiro Match Noirs',15,0,1),
+(13,'But de foot - Power Shot',74.99,0,1),
+(14,'Bâche de précision - Kipsta',20,0,1),
+(15,'Chaussure Predator EDGE.3 FG',90,0,1),
+(16,'Ballon Souvenir de la Ligue des Champions 2021',28.99,0,1);
 /*!40000 ALTER TABLE `produit` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -213,4 +213,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-16 16:24:35
+-- Dump completed on 2023-01-20 15:08:46
