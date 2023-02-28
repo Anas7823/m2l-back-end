@@ -12,9 +12,10 @@ app.get('/sports', async(req, res) =>{
     console.log('Connexion')
     conn = await mariadb.pool.getConnection();
     console.log('Requète 1');
-    const rows = await conn.query('SELECT * FROM Produit;')
+    const rows = await conn.query('SELECT * FROM produit;')
     console.log(rows);
     res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
 })
 
 //Route d'affichage de tous les produits d'un seul sport
@@ -24,9 +25,10 @@ app.get('/sport/:sport', async(req, res) =>{
     console.log('Connexion')
     conn = await mariadb.pool.getConnection();
     console.log('Requète 2');
-    const rows = await conn.query('SELECT Sport.NomSport, Produit.NomProduit, Produit.PrixProduit, Produit.IdProduit FROM produit INNER JOIN sport ON sport.IdSport = produit.IdSport WHERE NomSport = ?;',[Sport])
+    const rows = await conn.query('SELECT sport.NomSport, produit.NomProduit, produit.PrixProduit, produit.IdProduit FROM produit INNER JOIN sport ON sport.IdSport = produit.IdSport WHERE NomSport = ?;',[Sport])
     console.log(rows);
     res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
 })
 
 //Route d'affichage de tous les utilisateurs
@@ -38,6 +40,7 @@ app.get('/utilisateur', async(req, res) =>{
     const rows = await conn.query('SELECT * FROM compte;')
     console.log(rows);
     res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
 })
 
 //Route d'affichage d'un seul utilisateur'
@@ -50,6 +53,7 @@ app.get('/utilisateur/:id', async(req, res) =>{
     const rows = await conn.query('SELECT * FROM compte WHERE IdCompte = ? OR NomCompte = ?;',[id,id])
     console.log(rows);
     res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
 })
 
 // LA ROUTE POUR L'INSCRIPTION VIENT ICI //
@@ -62,6 +66,7 @@ app.post('/utilisateur', async(req,res) =>{
     const rows = await conn.query('SELECT * FROM compte;')    
     console.log('Requète effectué');
     res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
 })  
 
 
@@ -76,6 +81,7 @@ app.put('/utilisateur/:id',async(req,res)=>{
     const rows = await conn.query('SELECT * FROM compte;')    
     console.log('Requète effectué');
     res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
 })
 
 app.delete('/utilisateur/:id',async(req,res)=>{
@@ -88,6 +94,7 @@ app.delete('/utilisateur/:id',async(req,res)=>{
     const rows = await conn.query('SELECT * FROM compte;')    
     console.log('Requète effectué');
     res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
 })
 
 app.post('/produit',async(req,res)=>{
@@ -99,6 +106,7 @@ app.post('/produit',async(req,res)=>{
     const rows = await conn.query('SELECT * FROM produit;')    
     console.log('Requète effectué');
     res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
 })
 
 
@@ -112,6 +120,7 @@ app.put('/produit/:id',async(req,res)=>{
     const rows = await conn.query('SELECT * FROM produit;')    
     console.log('Requète effectué');
     res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
 })
 
 app.delete('/produit/:id',async(req,res)=>{
@@ -124,6 +133,7 @@ app.delete('/produit/:id',async(req,res)=>{
     const rows = await conn.query('SELECT * FROM produit;')    
     console.log('Requète effectué');
     res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
 })
 
 app.listen(8000, () =>{
