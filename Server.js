@@ -10,12 +10,19 @@ app.use(express.json())
 app.get('/sports', async(req, res) =>{
     let conn;
     console.log('Connexion')
-    conn = await mariadb.pool.getConnection();
-    console.log('Requète 1');
-    const rows = await conn.query('SELECT * FROM produit;')
-    console.log(rows);
-    res.status(200).json(rows)
-    console.log("Serveur à l'écoute");
+    try{
+        conn = await mariadb.pool.getConnection();
+        console.log('Requète 2');
+        const rows = await conn.query('SELECT * FROM produit')
+        console.log(rows);
+        res.status(200).json(rows)
+        console.log("Serveur à l'écoute");
+    }catch(err){
+        console.log(err)
+        throw err;
+    }finally{
+        if (conn) return conn.end();
+    }
 })
 
 //Route d'affichage de tous les produits d'un seul sport
@@ -23,24 +30,38 @@ app.get('/sport/:sport', async(req, res) =>{
     let conn;
     let Sport = req.params.sport
     console.log('Connexion')
-    conn = await mariadb.pool.getConnection();
-    console.log('Requète 2');
-    const rows = await conn.query('SELECT sport.NomSport, produit.NomProduit, produit.PrixProduit, produit.IdProduit FROM produit INNER JOIN sport ON sport.IdSport = produit.IdSport WHERE NomSport = ?;',[Sport])
-    console.log(rows);
-    res.status(200).json(rows)
-    console.log("Serveur à l'écoute");
+    try{
+        conn = await mariadb.pool.getConnection();
+        console.log('Requète 2');
+        const rows = await conn.query('SELECT sport.NomSport, produit.NomProduit, produit.PrixProduit, produit.IdProduit FROM produit INNER JOIN sport ON sport.IdSport = produit.IdSport WHERE NomSport = ?;',[Sport])
+        console.log(rows);
+        res.status(200).json(rows)
+        console.log("Serveur à l'écoute");
+    }catch(err){
+        console.log(err)
+        throw err;
+    }finally{
+        if (conn) return conn.end();
+    }
 })
 
 //Route d'affichage de tous les utilisateurs
 app.get('/utilisateur', async(req, res) =>{
     let conn;
     console.log('Connexion')
-    conn = await mariadb.pool.getConnection();
-    console.log('Requète 3');
-    const rows = await conn.query('SELECT * FROM compte;')
-    console.log(rows);
-    res.status(200).json(rows)
-    console.log("Serveur à l'écoute");
+    try{
+        conn = await mariadb.pool.getConnection();
+        console.log('Requète 3');
+        const rows = await conn.query('SELECT * FROM compte;')
+        console.log(rows);
+        res.status(200).json(rows)
+        console.log("Serveur à l'écoute");
+    }catch(err){
+        console.log(err)
+        throw err;
+    }finally{
+        if (conn) return conn.end();
+    }
 })
 
 //Route d'affichage d'un seul utilisateur'
@@ -48,12 +69,19 @@ app.get('/utilisateur/:id', async(req, res) =>{
     let conn;
     let id = req.params.id
     console.log('Connexion')
-    conn = await mariadb.pool.getConnection();
-    console.log('Requète 4');
-    const rows = await conn.query('SELECT * FROM compte WHERE IdCompte = ? OR NomCompte = ?;',[id,id])
-    console.log(rows);
-    res.status(200).json(rows)
-    console.log("Serveur à l'écoute");
+    try{
+        conn = await mariadb.pool.getConnection();
+        console.log('Requète 4');
+        const rows = await conn.query('SELECT * FROM compte WHERE IdCompte = ? OR NomCompte = ?;',[id,id])
+        console.log(rows);
+        res.status(200).json(rows)
+        console.log("Serveur à l'écoute");
+    }catch(err){
+        console.log(err)
+        throw err;
+    }finally{
+        if (conn) return conn.end();
+    }
 })
 
 // LA ROUTE POUR L'INSCRIPTION VIENT ICI //
