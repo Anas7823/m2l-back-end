@@ -25,6 +25,25 @@ app.get('/sports', async(req, res) =>{
     }
 })
 
+//Route d'affichage de tous les sports
+app.get('/listesport', async(req, res) =>{
+    let conn;
+    console.log('Connexion')
+    try{
+        conn = await mariadb.pool.getConnection();
+        console.log('Requète listeSport');
+        const rows = await conn.query('SELECT * FROM sport')
+        console.log(rows);
+        res.status(200).json(rows)
+        console.log("Serveur à l'écoute");
+    }catch(err){
+        console.log(err)
+        throw err;
+    }finally{
+        if (conn) return conn.end();
+    }
+})
+
 //Route d'affichage de tous les produits d'un seul sport
 app.get('/sport/:sport', async(req, res) =>{
     let conn;
