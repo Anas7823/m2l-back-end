@@ -12,7 +12,7 @@ app.get('/sports', async(req, res) =>{
     console.log('Connexion')
     try{
         conn = await mariadb.pool.getConnection();
-        console.log('Requète 2');
+        console.log('Requète 1');
         const rows = await conn.query('SELECT * FROM produit')
         console.log(rows);
         res.status(200).json(rows)
@@ -34,6 +34,25 @@ app.get('/sport/:sport', async(req, res) =>{
         conn = await mariadb.pool.getConnection();
         console.log('Requète 2');
         const rows = await conn.query('SELECT sport.NomSport, produit.NomProduit, produit.PrixProduit, produit.IdProduit FROM produit INNER JOIN sport ON sport.IdSport = produit.IdSport WHERE NomSport = ?;',[Sport])
+        console.log(rows);
+        res.status(200).json(rows)
+        console.log("Serveur à l'écoute");
+    }catch(err){
+        console.log(err)
+        throw err;
+    }finally{
+        if (conn) return conn.end();
+    }
+})
+
+//Route d'affichage pour un produit 
+app.get('/produit/:id', async(req, res) =>{
+    let conn;
+    console.log('Connexion')
+    try{
+        conn = await mariadb.pool.getConnection();
+        console.log('Requète récupe1produitById');
+        const rows = await conn.query('SELECT * FROM produit WHERE IdProduit = ?', [req.params.id])
         console.log(rows);
         res.status(200).json(rows)
         console.log("Serveur à l'écoute");
