@@ -2,6 +2,8 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const mariadb = require('./connectBDD')
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken")
 
 app.use(cors())
 app.use(express.json())
@@ -124,17 +126,54 @@ app.get('/utilisateur/:id', async(req, res) =>{
 
 // LA ROUTE POUR L'INSCRIPTION VIENT ICI //
 app.post('/utilisateur', async(req,res) =>{
-    let conn;
-    console.log('Connexion');
-    conn = await mariadb.pool.getConnection();
-    console.log('Requète 5');
-    await conn.query('INSERT INTO compte(NomCompte, MdpCompte, MailCompte, AdresseCompte) VALUES (?,?,?,?)',[req.body.nom,req.body.mdp,req.body.mail,req.body.adress])
-    const rows = await conn.query('SELECT * FROM compte;')    
-    console.log('Requète effectué');
-    res.status(200).json(rows)
-    console.log("Serveur à l'écoute");
+    const password = req.body.mdp
+    // Hash the password using bcrypt
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    try{
+        let conn;
+        console.log('Connexion');
+        conn = await mariadb.pool.getConnection();
+        console.log('Requète 5');
+        await conn.query('INSERT INTO compte(NomCompte, MdpCompte, MailCompte, AdresseCompte) VALUES (?,?,?,?)',[req.body.nom,hashedPassword,req.body.mail,req.body.adress, hashedPassword])
+        const rows = await conn.query('SELECT * FROM compte;')    
+        console.log('Requète effectué');
+        res.status(200).json(rows)
+        console.log("Serveur à l'écoute");
+    }catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error creating user.' });
+      }
 })  
 
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Veuillez saisir une adresse e-mail et un mot de passe.' });
+    }
+    try {
+        const conn = await pool.getConnection();
+        const rows = await conn.query('SELECT * FROM users WHERE mail = ?', [email]);
+        conn.release();
+        if (rows.length > 0) {
+        const user = rows[0];
+        console.log(password,  user.password)
+        console.log(await bcrypt.compare(password, user.password));
+        const match = await bcrypt.compare(password, user.password);
+        if (match) {
+            const token = jwt.sign({ sub: user.id }, 'secret_key');
+            return res.json({ message: 'Connexion réussie !',  token });
+        } else {
+            return res.status(401).json({ message: 'Adresse e-mail ou mot de passe incorrect.' });
+        }
+        } else {
+        return res.status(401).json({ message: 'Adresse e-mail ou mot de passe incorrect.' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Erreur lors de l\'inscription.' });
+    }
+})
 
 app.put('/utilisateur/:id',async(req,res)=>{
     let conn;
