@@ -27,6 +27,45 @@ app.get('/sports', async(req, res) =>{
     }
 })
 
+//Route d'affichage de tous les produits trier par prix
+app.get('/sportsprix', async(req, res) =>{
+    let conn;
+    console.log('Connexion')
+    try{
+        conn = await mariadb.pool.getConnection();
+        console.log('Requète 1');
+        const rows = await conn.query('SELECT * FROM produit ORDER BY PrixProduit')
+        console.log(rows);
+        res.status(200).json(rows)
+        console.log("Serveur à l'écoute");
+    }catch(err){
+        console.log(err)
+        throw err;
+    }finally{
+        if (conn) return conn.end();
+    }
+})
+
+//Route d'affichage de tous les produits trier par nom
+app.get('/sportsprix', async(req, res) =>{
+    let conn;
+    console.log('Connexion')
+    try{
+        conn = await mariadb.pool.getConnection();
+        console.log('Requète 1');
+        const rows = await conn.query('SELECT * FROM produit ORDER BY NomProduit')
+        console.log(rows);
+        res.status(200).json(rows)
+        console.log("Serveur à l'écoute");
+    }catch(err){
+        console.log(err)
+        throw err;
+    }finally{
+        if (conn) return conn.end();
+    }
+})
+
+
 //Route d'affichage de tous les sports
 app.get('/listesport', async(req, res) =>{
     let conn;
@@ -144,36 +183,42 @@ app.post('/utilisateur', async(req,res) =>{
         console.error(error);
         res.status(500).json({ success: false, message: 'Error creating user.' });
       }
-})  
+})
 
 app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const password = req.body.mdp;
+    const email = req.body.mail;
+    // Hash the password using bcrypt
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     if (!email || !password) {
-        return res.status(400).json({ message: 'Veuillez saisir une adresse e-mail et un mot de passe.' });
+      return res.status(400).json({ message: 'Veuillez saisir une adresse e-mail et un mot de passe.' });
     }
+  
     try {
-        const conn = await pool.getConnection();
-        const rows = await conn.query('SELECT * FROM users WHERE mail = ?', [email]);
-        conn.release();
-        if (rows.length > 0) {
+      const conn = await mariadb.pool.getConnection();
+      const rows = await conn.query('SELECT * FROM compte WHERE MailCompte = ?', [email]);
+      conn.release();
+  
+      if (rows.length > 0) {
         const user = rows[0];
-        console.log(password,  user.password)
-        console.log(await bcrypt.compare(password, user.password));
-        const match = await bcrypt.compare(password, user.password);
+        const match = await bcrypt.compare(password, hashedPassword);
+  
         if (match) {
-            const token = jwt.sign({ sub: user.id }, 'secret_key');
-            return res.json({ message: 'Connexion réussie !',  token });
+          const token = jwt.sign({ sub: user.id }, 'secret_key');
+          return res.json({ message: 'Connexion réussie !', token });
         } else {
-            return res.status(401).json({ message: 'Adresse e-mail ou mot de passe incorrect.' });
+          return res.status(401).json({ message: 'Adresse e-mail ou mot de passe incorrect.' });
         }
-        } else {
+      } else {
         return res.status(401).json({ message: 'Adresse e-mail ou mot de passe incorrect.' });
-        }
+      }
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Erreur lors de l\'inscription.' });
+      console.error(error);
+      return res.status(500).json({ message: 'Erreur lors de la connexion.' });
     }
-})
+  });
+
 
 app.put('/utilisateur/:id',async(req,res)=>{
     let conn;
