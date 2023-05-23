@@ -93,7 +93,7 @@ app.get('/sport/:sport', async(req, res) =>{
     try{
         conn = await mariadb.pool.getConnection();
         console.log('Requète 2');
-        const rows = await conn.query('SELECT sport.NomSport, produit.NomProduit, produit.PrixProduit, produit.IdProduit FROM produit INNER JOIN sport ON sport.IdSport = produit.IdSport WHERE NomSport = ?;',[Sport])
+        const rows = await conn.query('SELECT sport.NomSport, produit.NomProduit, produit.PrixProduit, produit.IdProduit, produit.StockProduit FROM produit INNER JOIN sport ON sport.IdSport = produit.IdSport WHERE NomSport = ?;',[Sport])
         console.log(rows);
         res.status(200).json(rows)
         console.log("Serveur à l'écoute");
