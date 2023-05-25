@@ -8,7 +8,6 @@ const jwt = require("jsonwebtoken")
 app.use(cors())
 app.use(express.json())
 
-//Route d'affichage de tous les produits
 app.get('/sports', async(req, res) =>{
     let conn;
     console.log('Connexion')
@@ -26,6 +25,25 @@ app.get('/sports', async(req, res) =>{
         if (conn) return conn.end();
     }
 })
+
+//Route d'affichage de produit par recherche
+app.get('/rechercher', async (req, res) => {
+    let conn;
+    console.log('Connexion');
+    try {
+      conn = await mariadb.pool.getConnection();
+      console.log('Requète recherche');
+      const rows = await conn.query('SELECT * FROM Produit WHERE NomProduit LIKE ?', [`%${req.query.search}%`]);
+      console.log(rows);
+      res.status(200).json(rows);
+      console.log("Serveur à l'écoute");
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: 'Une erreur est survenue lors de la recherche.' });
+    } finally {
+      if (conn) return conn.end();
+    }
+});  
 
 //Route d'affichage de tous les produits trier par prix
 app.get('/sportsprix', async(req, res) =>{
@@ -47,7 +65,7 @@ app.get('/sportsprix', async(req, res) =>{
 })
 
 //Route d'affichage de tous les produits trier par nom
-app.get('/sportsprix', async(req, res) =>{
+app.get('/sportsnom', async(req, res) =>{
     let conn;
     console.log('Connexion')
     try{
