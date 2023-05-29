@@ -288,6 +288,20 @@ app.put('/produit/:id',async(req,res)=>{
     const rows = await conn.query('SELECT * FROM produit;')    
     console.log('Requète effectué');
     res.status(200).json(rows)
+    console.log("Serveur à l'écoute");                                                                      
+})
+// UPDATE Produit SET StockProduit = StockProduit + 1*
+app.put('/addproduit/:id',async(req,res)=>{
+    let conn;
+    let id = req.params.id
+    console.log(id);
+    console.log('Connexion');
+    conn = await mariadb.pool.getConnection();
+    console.log('Ajout du produit effectuer');
+    await conn.query('UPDATE Produit SET StockProduit = StockProduit + 1 WHERE IdProduit = ?',[id])
+    const rows = await conn.query('SELECT * FROM produit;')    
+    console.log('Requète effectué');
+    res.status(200).json(rows)
     console.log("Serveur à l'écoute");
 })
 

@@ -18,9 +18,11 @@
   },
   "homepage": "https://github.com/Anas7823/m2l-back-end#readme",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
     "mariadb": "^3.0.2",
     "nodemon": "^2.0.22"
   },
