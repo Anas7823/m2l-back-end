@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken")
 app.use(cors())
 app.use(express.json())
 
+// affiche tout les produits
 app.get('/sports', async(req, res) =>{
     let conn;
     console.log('Connexion')
@@ -43,7 +44,7 @@ app.get('/rechercher', async (req, res) => {
     } finally {
       if (conn) return conn.end();
     }
-});  
+});
 
 //Route d'affichage de tous les produits trier par prix
 app.get('/sportsprix', async(req, res) =>{
@@ -64,7 +65,7 @@ app.get('/sportsprix', async(req, res) =>{
     }
 })
 
-//Route d'affichage de tous les produits trier par nom
+// Route d'affichage de tous les produits trier par nom
 app.get('/sportsnom', async(req, res) =>{
     let conn;
     console.log('Connexion')
@@ -84,7 +85,7 @@ app.get('/sportsnom', async(req, res) =>{
 })
 
 
-//Route d'affichage de tous les sports
+// Route d'affichage de tous les sports
 app.get('/listesport', async(req, res) =>{
     let conn;
     console.log('Connexion')
@@ -103,7 +104,7 @@ app.get('/listesport', async(req, res) =>{
     }
 })
 
-//Route d'affichage de tous les produits d'un seul sport
+// Route d'affichage de tous les produits d'un seul sport
 app.get('/sport/:sport', async(req, res) =>{
     let conn;
     let Sport = req.params.sport
@@ -123,7 +124,7 @@ app.get('/sport/:sport', async(req, res) =>{
     }
 })
 
-//Route d'affichage pour un produit 
+// Route d'affichage pour un produit grâce à l'id
 app.get('/produit/:id', async(req, res) =>{
     let conn;
     console.log('Connexion')
@@ -140,6 +141,77 @@ app.get('/produit/:id', async(req, res) =>{
     }finally{
         if (conn) return conn.end();
     }
+})
+
+// Route d'insertion d'un nouveau produit 
+app.post('/produit',async(req,res)=>{
+    let conn;
+    console.log('Connexion');
+    conn = await mariadb.pool.getConnection();
+    console.log('Requète 8');
+    await conn.query('INSERT INTO produit(NomProduit, PrixProduit, StockProduit, IdSport) VALUES (?,?,?,?)',[req.body.nom,req.body.prix,req.body.stock,req.body.sport])
+    const rows = await conn.query('SELECT * FROM produit;')    
+    console.log('Requète effectué');
+    res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
+})
+
+// Route d'modification d'un produit 
+app.put('/produit/:id',async(req,res)=>{
+    let conn;
+    let id = req.params.id
+    console.log('Connexion');
+    conn = await mariadb.pool.getConnection();
+    console.log('Requète 9');
+    await conn.query('UPDATE produit SET NomProduit = ?, PrixProduit = ?, StockProduit = ?, IdSport = ? WHERE IdProduit = ?',[req.body.nom,req.body.prix,req.body.stock,req.body.sport,id])
+    const rows = await conn.query('SELECT * FROM produit;')    
+    console.log('Requète effectué');
+    res.status(200).json(rows)
+    console.log("Serveur à l'écoute");                                                                      
+})
+
+// Route pour ajouter  1 au stock d'un produit
+app.put('/addproduit/:id',async(req,res)=>{
+    let conn;
+    let id = req.params.id
+    console.log(id);
+    console.log('Connexion');
+    conn = await mariadb.pool.getConnection();
+    console.log('Ajout du produit effectuer');
+    await conn.query('UPDATE Produit SET StockProduit = StockProduit + 1 WHERE IdProduit = ?',[id])
+    const rows = await conn.query('SELECT * FROM produit;')    
+    console.log('Requète effectué');
+    res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
+})
+
+// Route pour retirer 1 au stock d'un produit
+app.put('/substractproduit/:id',async(req,res)=>{
+    let conn;
+    let id = req.params.id
+    console.log(id);
+    console.log('Connexion');
+    conn = await mariadb.pool.getConnection();
+    console.log('Ajout du produit effectuer');
+    await conn.query('UPDATE Produit SET StockProduit = StockProduit - 1 WHERE IdProduit = ?',[id])
+    const rows = await conn.query('SELECT * FROM produit;')    
+    console.log('Requète effectué');
+    res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
+})
+
+// Route de suppression d'un produit
+app.delete('/delproduit/:id',async(req,res)=>{
+    let conn;
+    let id = req.params.id
+    console.log('Connexion');
+    conn = await mariadb.pool.getConnection();
+    console.log('Requète 10');
+    await conn.query('DELETE FROM produit WHERE IdProduit = ?',[id])
+    const rows = await conn.query('SELECT * FROM produit;')    
+    console.log('Requète effectué');
+    res.status(200).json(rows)
+    console.log("Serveur à l'écoute");
 })
 
 //Route d'affichage de tous les utilisateurs
@@ -161,7 +233,7 @@ app.get('/utilisateur', async(req, res) =>{
     }
 })
 
-//Route d'affichage d'un seul utilisateur'
+//Route d'affichage d'un seul utilisateur grâce à l'id
 app.get('/utilisateur/:id', async(req, res) =>{
     let conn;
     let id = req.params.id
@@ -181,7 +253,7 @@ app.get('/utilisateur/:id', async(req, res) =>{
     }
 })
 
-// LA ROUTE POUR L'INSCRIPTION VIENT ICI //
+// LA ROUTE POUR L'INSCRIPTION
 app.post('/utilisateur', async(req,res) =>{
     const password = req.body.mdp
     // Hash the password using bcrypt
@@ -203,6 +275,7 @@ app.post('/utilisateur', async(req,res) =>{
       }
 })
 
+// Route pour la connexion
 app.post('/login', async (req, res) => {
     const password = req.body.mdp;
     const email = req.body.mail;
@@ -235,9 +308,9 @@ app.post('/login', async (req, res) => {
       console.error(error);
       return res.status(500).json({ message: 'Erreur lors de la connexion.' });
     }
-  });
+});
 
-
+// Route modification d'utilisateur
 app.put('/utilisateur/:id',async(req,res)=>{
     let conn;
     let id = req.params.id
@@ -252,6 +325,7 @@ app.put('/utilisateur/:id',async(req,res)=>{
     console.log("Serveur à l'écoute");
 })
 
+// Route de suppression d'utilisateur
 app.delete('/utilisateur/:id',async(req,res)=>{
     let conn;
     let id = req.params.id
@@ -265,58 +339,6 @@ app.delete('/utilisateur/:id',async(req,res)=>{
     console.log("Serveur à l'écoute");
 })
 
-app.post('/produit',async(req,res)=>{
-    let conn;
-    console.log('Connexion');
-    conn = await mariadb.pool.getConnection();
-    console.log('Requète 8');
-    await conn.query('INSERT INTO produit(NomProduit, PrixProduit, StockProduit, IdSport) VALUES (?,?,?,?)',[req.body.nom,req.body.prix,req.body.stock,req.body.sport])
-    const rows = await conn.query('SELECT * FROM produit;')    
-    console.log('Requète effectué');
-    res.status(200).json(rows)
-    console.log("Serveur à l'écoute");
-})
-
-
-app.put('/produit/:id',async(req,res)=>{
-    let conn;
-    let id = req.params.id
-    console.log('Connexion');
-    conn = await mariadb.pool.getConnection();
-    console.log('Requète 9');
-    await conn.query('UPDATE produit SET NomProduit = ?, PrixProduit = ?, StockProduit = ?, IdSport = ? WHERE IdProduit = ?',[req.body.nom,req.body.prix,req.body.stock,req.body.sport,id])
-    const rows = await conn.query('SELECT * FROM produit;')    
-    console.log('Requète effectué');
-    res.status(200).json(rows)
-    console.log("Serveur à l'écoute");                                                                      
-})
-// UPDATE Produit SET StockProduit = StockProduit + 1*
-app.put('/addproduit/:id',async(req,res)=>{
-    let conn;
-    let id = req.params.id
-    console.log(id);
-    console.log('Connexion');
-    conn = await mariadb.pool.getConnection();
-    console.log('Ajout du produit effectuer');
-    await conn.query('UPDATE Produit SET StockProduit = StockProduit + 1 WHERE IdProduit = ?',[id])
-    const rows = await conn.query('SELECT * FROM produit;')    
-    console.log('Requète effectué');
-    res.status(200).json(rows)
-    console.log("Serveur à l'écoute");
-})
-
-app.delete('/produit/:id',async(req,res)=>{
-    let conn;
-    let id = req.params.id
-    console.log('Connexion');
-    conn = await mariadb.pool.getConnection();
-    console.log('Requète 10');
-    await conn.query('DELETE FROM produit WHERE IdProduit = ?',[id])
-    const rows = await conn.query('SELECT * FROM produit;')    
-    console.log('Requète effectué');
-    res.status(200).json(rows)
-    console.log("Serveur à l'écoute");
-})
 
 app.listen(8000, () =>{
     console.log("Serveur à l'écoute");
