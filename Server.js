@@ -207,7 +207,8 @@ app.delete('/delproduit/:id',async(req,res)=>{
     console.log('Connexion');
     conn = await mariadb.pool.getConnection();
     console.log('Requète 10');
-    await conn.query('DELETE FROM produit WHERE IdProduit = ?',[id])
+    await conn.query('UPDATE Produit SET StockProduit = 0 WHERE IdProduit = ?',[id]) // pour éviter du supp en bdd pour le moment
+    // await conn.query('DELETE FROM produit WHERE IdProduit = ?',[id])
     const rows = await conn.query('SELECT * FROM produit;')    
     console.log('Requète effectué');
     res.status(200).json(rows)
