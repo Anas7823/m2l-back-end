@@ -46,44 +46,6 @@ app.get('/rechercher', async (req, res) => {
     }
 });
 
-//Route d'affichage de tous les produits trier par prix
-app.get('/sportsprix', async(req, res) =>{
-    let conn;
-    console.log('Connexion')
-    try{
-        conn = await mariadb.pool.getConnection();
-        console.log('Requète 1');
-        const rows = await conn.query('SELECT * FROM produit ORDER BY PrixProduit')
-        console.log(rows);
-        res.status(200).json(rows)
-        console.log("Serveur à l'écoute");
-    }catch(err){
-        console.log(err)
-        throw err;
-    }finally{
-        if (conn) return conn.end();
-    }
-})
-
-// Route d'affichage de tous les produits trier par nom
-app.get('/sportsnom', async(req, res) =>{
-    let conn;
-    console.log('Connexion')
-    try{
-        conn = await mariadb.pool.getConnection();
-        console.log('Requète 1');
-        const rows = await conn.query('SELECT * FROM produit ORDER BY NomProduit')
-        console.log(rows);
-        res.status(200).json(rows)
-        console.log("Serveur à l'écoute");
-    }catch(err){
-        console.log(err)
-        throw err;
-    }finally{
-        if (conn) return conn.end();
-    }
-})
-
 
 // Route d'affichage de tous les sports
 app.get('/listesport', async(req, res) =>{
