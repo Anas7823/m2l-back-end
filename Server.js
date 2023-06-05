@@ -156,19 +156,55 @@ app.post('/produit',async(req,res)=>{
     console.log("Serveur à l'écoute");
 })
 
-// Route d'modification d'un produit 
-app.put('/produit/:id',async(req,res)=>{
+// Route de modification d'un produit 
+app.put('/produit/:id', async (req, res) => {
     let conn;
-    let id = req.params.id
+    const id = req.params.id;
     console.log('Connexion');
     conn = await mariadb.pool.getConnection();
     console.log('Requète 9');
-    await conn.query('UPDATE produit SET NomProduit = ?, PrixProduit = ?, StockProduit = ?, IdSport = ? WHERE IdProduit = ?',[req.body.nom,req.body.prix,req.body.stock,req.body.sport,id])
-    const rows = await conn.query('SELECT * FROM produit;')    
-    console.log('Requète effectué');
-    res.status(200).json(rows)
-    console.log("Serveur à l'écoute");                                                                      
-})
+    
+    // Construire la requête de mise à jour en fonction des champs fournis dans la requête
+    let updateQuery = 'UPDATE produit SET ';
+    const updateParams = [];
+    
+    if (req.body.nom) {
+      updateQuery += 'NomProduit = ?, ';
+      updateParams.push(req.body.nom);
+    }
+    
+    if (req.body.prix) {
+      updateQuery += 'PrixProduit = ?, ';
+      updateParams.push(req.body.prix);
+    }
+    
+    if (req.body.stock) {
+      updateQuery += 'StockProduit = ?, ';
+      updateParams.push(req.body.stock);
+    }
+    
+    if (req.body.idSport) {
+      updateQuery += 'IdSport = ?, ';
+      updateParams.push(req.body.idSport);
+    }
+    
+    // Supprimer la virgule finale de la requête
+    updateQuery = updateQuery.slice(0, -2);
+    
+    // Ajouter la clause WHERE pour filtrer par ID
+    updateQuery += ' WHERE IdProduit = ?';
+    updateParams.push(id);
+    
+    // Exécuter la requête de mise à jour
+    await conn.query(updateQuery, updateParams);
+    
+    const rows = await conn.query('SELECT * FROM produit;');
+    console.log('Requète effectuée');
+    res.status(200).json(rows);
+    console.log("Serveur à l'écoute");
+  });
+  
+  
 
 // Route pour ajouter  1 au stock d'un produit
 app.put('/addproduit/:id',async(req,res)=>{
