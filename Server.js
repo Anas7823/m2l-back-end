@@ -262,7 +262,7 @@ app.post('/utilisateur', async(req,res) =>{
         console.log('Connexion');
         conn = await mariadb.pool.getConnection();
         console.log('Requète 5');
-        await conn.query('INSERT INTO compte(NomCompte, MdpCompte, MailCompte, AdresseCompte) VALUES (?,?,?,?)',[req.body.nom,hashedPassword,req.body.mail,req.body.adress, hashedPassword])
+        await conn.query('INSERT INTO compte(NomCompte, MdpCompte, MailCompte, AdresseCompte) VALUES (?,?,?,?)',[req.body.nom,hashedPassword,req.body.mail,req.body.adress])
         const rows = await conn.query('SELECT * FROM compte;')    
         console.log('Requète effectué');
         res.status(200).json(rows)
@@ -309,19 +309,56 @@ app.post('/login', async (req, res) => {
 });
 
 // Route modification d'utilisateur
-app.put('/utilisateur/:id',async(req,res)=>{
+app.put('/utilisateur/:id', async (req, res) => {
     let conn;
-    let id = req.params.id
+    const id = req.params.id;
     console.log('Connexion');
     conn = await mariadb.pool.getConnection();
     console.log('Requète 6');
-    await conn.query('UPDATE compte SET NomCompte = ?, MdpCompte = ?, CompteAdmin = ?, MailCompte = ?, AdresseCompte = ? WHERE IdCompte = ? OR NomCompte = ?',
-    [req.body.nom,req.body.mdp,req.body.admin,req.body.mail,req.body.adress,id,id])
-    const rows = await conn.query('SELECT * FROM compte;')    
-    console.log('Requète effectué');
-    res.status(200).json(rows)
+  
+    let updateQuery = 'UPDATE compte SET';
+    const updateParams = [];
+  
+    if (req.body.nom) {
+      updateQuery += ' NomCompte = ?,';
+      updateParams.push(req.body.nom);
+    }
+  
+    if (req.body.mdp) {
+      updateQuery += ' MdpCompte = ?,';
+      updateParams.push(req.body.mdp);
+    }
+  
+    if (req.body.admin) {
+      updateQuery += ' CompteAdmin = ?,';
+      updateParams.push(req.body.admin);
+    }
+  
+    if (req.body.mail) {
+      updateQuery += ' MailCompte = ?,';
+      updateParams.push(req.body.mail);
+    }
+  
+    if (req.body.adress) {
+      updateQuery += ' AdresseCompte = ?,';
+      updateParams.push(req.body.adress);
+    }
+  
+    // Supprimer la virgule finale de la requête
+    updateQuery = updateQuery.slice(0, -1);
+  
+    // Ajouter la clause WHERE pour filtrer par ID
+    updateQuery += ' WHERE IdCompte = ? OR NomCompte = ?';
+    updateParams.push(id, id);
+  
+    await conn.query(updateQuery, updateParams);
+  
+    const rows = await conn.query('SELECT * FROM compte;');
+    console.log('Requète effectuée');
+    res.status(200).json(rows);
     console.log("Serveur à l'écoute");
-})
+  });
+  
 
 // Route de suppression d'utilisateur
 app.delete('/utilisateur/:id',async(req,res)=>{
