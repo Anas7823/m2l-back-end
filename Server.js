@@ -4,9 +4,21 @@ const cors = require('cors')
 const mariadb = require('./connectBDD')
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken")
+const session = require('express-session') // https://expressjs.com/en/resources/middleware/session.html
 
 app.use(cors())
 app.use(express.json())
+
+app.use(session({
+  name: process.env.SESSION_NAME, // session id
+  resave: false,
+  saveUninitialized: false,
+  secret: process.env.SESSION_SECRET,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 1 semaine
+    secure: false, // true en production
+  },
+}))  
 
 // affiche tout les produits
 app.get('/sports', async(req, res) =>{
@@ -35,7 +47,6 @@ app.get('/rechercher', async (req, res) => {
       conn = await mariadb.pool.getConnection();
       console.log('Requète recherche');
       const rows = await conn.query('SELECT * FROM Produit WHERE NomProduit LIKE ?', [`%${req.query.search}%`]);
-      console.log(rows);
       res.status(200).json(rows);
       console.log("Serveur à l'écoute");
     } catch (err) {
@@ -74,7 +85,7 @@ app.get('/sport/:sport', async(req, res) =>{
     try{
         conn = await mariadb.pool.getConnection();
         console.log('Requète 2');
-        const rows = await conn.query('SELECT sport.NomSport, produit.NomProduit, produit.PrixProduit, produit.IdProduit, produit.StockProduit FROM produit INNER JOIN sport ON sport.IdSport = produit.IdSport WHERE NomSport = ?;',[Sport])
+        const rows = await conn.query('SELECT sport.NomSport, produit.NomProduit, produit.PrixProduit, produit.IdProduit, produit.StockProduit, produit.ImageProduit FROM produit INNER JOIN sport ON sport.IdSport = produit.IdSport WHERE NomSport = ?;',[Sport])
         console.log(rows);
         res.status(200).json(rows)
         console.log("Serveur à l'écoute");
@@ -111,7 +122,7 @@ app.post('/produit',async(req,res)=>{
     console.log('Connexion');
     conn = await mariadb.pool.getConnection();
     console.log('Requète 8');
-    await conn.query('INSERT INTO produit(NomProduit, PrixProduit, StockProduit, IdSport) VALUES (?,?,?,?)',[req.body.nom,req.body.prix,req.body.stock,req.body.idSport])
+    await conn.query('INSERT INTO produit(NomProduit, PrixProduit, StockProduit, IdSport, ImageProduit ) VALUES (?,?,?,?,?)',[req.body.nom,req.body.prix,req.body.stock,req.body.idSport, req.body.img ])
     const rows = await conn.query('SELECT * FROM produit;')    
     console.log('Requète effectué');
     res.status(200).json(rows)
@@ -148,6 +159,11 @@ app.put('/produit/:id', async (req, res) => {
     if (req.body.idSport) {
       updateQuery += 'IdSport = ?, ';
       updateParams.push(req.body.idSport);
+    }
+
+    if (req.body.img) {
+      updateQuery += 'ImageProduit = ?, ';
+      updateParams.push(req.body.img);
     }
     
     // Supprimer la virgule finale de la requête
@@ -234,13 +250,12 @@ app.get('/utilisateur', async(req, res) =>{
 //Route d'affichage d'un seul utilisateur grâce à l'id
 app.get('/utilisateur/:id', async(req, res) =>{
     let conn;
-    let id = req.params.id
     console.log('Connexion')
     try{
         conn = await mariadb.pool.getConnection();
         console.log('Requète 4');
-        const rows = await conn.query('SELECT * FROM compte WHERE IdCompte = ? OR NomCompte = ?;',[id,id])
-        console.log(rows);
+        const rows = await conn.query('SELECT * FROM compte WHERE IdCompte = ?;', [req.params.id]);
+        console.log( rows);
         res.status(200).json(rows)
         console.log("Serveur à l'écoute");
     }catch(err){
@@ -264,6 +279,8 @@ app.post('/utilisateur', async(req,res) =>{
         console.log('Requète 5');
         await conn.query('INSERT INTO compte(NomCompte, MdpCompte, MailCompte, AdresseCompte) VALUES (?,?,?,?)',[req.body.nom,hashedPassword,req.body.mail,req.body.adress])
         const rows = await conn.query('SELECT * FROM compte;')    
+        req.session.idUser = rows[0].IdCompte; // On stocke l'id de l'utilisateur dans la session
+        console.log(req.session.idUser);
         console.log('Requète effectué');
         res.status(200).json(rows)
         console.log("Serveur à l'écoute");
@@ -295,6 +312,9 @@ app.post('/login', async (req, res) => {
   
         if (match) {
           const token = jwt.sign({ sub: user.id }, 'secret_key');
+          req.session.idUser = user.IdCompte; // On stocke l'id de l'utilisateur dans la session
+          
+          console.log("session = " + req.session.idUser);
           return res.json({ message: 'Connexion réussie !', token });
         } else {
           return res.status(401).json({ message: 'Adresse e-mail ou mot de passe incorrect.' });
@@ -310,6 +330,9 @@ app.post('/login', async (req, res) => {
 
 // Route modification d'utilisateur
 app.put('/utilisateur/:id', async (req, res) => {
+    const password = req.body.mdp
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     let conn;
     const id = req.params.id;
     console.log('Connexion');
@@ -326,7 +349,7 @@ app.put('/utilisateur/:id', async (req, res) => {
   
     if (req.body.mdp) {
       updateQuery += ' MdpCompte = ?,';
-      updateParams.push(req.body.mdp);
+      updateParams.push(hashedPassword);
     }
   
     if (req.body.admin) {
@@ -373,7 +396,6 @@ app.delete('/utilisateur/:id',async(req,res)=>{
     res.status(200).json(rows)
     console.log("Serveur à l'écoute");
 })
-
 
 app.listen(8000, () =>{
     console.log("Serveur à l'écoute");
