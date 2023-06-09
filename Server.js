@@ -18,7 +18,33 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24 * 7, // 1 semaine
     secure: false, // true en production
   },
-}))  
+}))
+
+// const protectedRoutes = (req, res, next ) => {
+//   if (req.session.idUser !== req.params.id) {
+//     return res.status(401).json({ message: 'Vous n\'avez pas le droit d\'accéder à cette ressource.' });
+//   }  
+//   else{
+//     next()
+//   }
+// }
+
+// Route pour récupérer les informations de session
+app.get('/session', (req, res) => {
+  if (req.session.idUser) {
+    // Si l'ID de l'utilisateur est défini dans la session, renvoyer les informations de session
+    const sessionInfo = {
+      idUser: req.session.idUser,
+      // Ajoutez d'autres informations de session que vous souhaitez envoyer
+    };
+    console.log('Session info', sessionInfo);
+    res.status(200).json(sessionInfo);
+  } else {
+    // Si l'ID de l'utilisateur n'est pas défini, renvoyer un statut 404 (non trouvé)
+    res.status(404).json({ message: 'Session not found' });
+  }
+});
+
 
 // affiche tout les produits
 app.get('/sports', async(req, res) =>{
@@ -117,7 +143,7 @@ app.get('/produit/:id', async(req, res) =>{
 })
 
 // Route d'insertion d'un nouveau produit 
-app.post('/produit',async(req,res)=>{
+app.post('/produit', async(req,res)=>{
     let conn;
     console.log('Connexion');
     conn = await mariadb.pool.getConnection();
@@ -185,7 +211,7 @@ app.put('/produit/:id', async (req, res) => {
   
 
 // Route pour ajouter  1 au stock d'un produit
-app.put('/addproduit/:id',async(req,res)=>{
+app.put('/addproduit/:id' ,async(req,res)=>{
     let conn;
     let id = req.params.id
     console.log(id);
@@ -200,7 +226,7 @@ app.put('/addproduit/:id',async(req,res)=>{
 })
 
 // Route pour retirer 1 au stock d'un produit
-app.put('/substractproduit/:id',async(req,res)=>{
+app.put('/substractproduit/:id' ,async(req,res)=>{
     let conn;
     let id = req.params.id
     console.log(id);
@@ -215,7 +241,7 @@ app.put('/substractproduit/:id',async(req,res)=>{
 })
 
 // Route de suppression d'un produit
-app.delete('/delproduit/:id',async(req,res)=>{
+app.delete('/delproduit/:id' ,async(req,res)=>{
     let conn;
     let id = req.params.id
     console.log('Connexion');
@@ -229,7 +255,7 @@ app.delete('/delproduit/:id',async(req,res)=>{
 })
 
 //Route d'affichage de tous les utilisateurs
-app.get('/utilisateur', async(req, res) =>{
+app.get('/utilisateur' , async(req, res) =>{
     let conn;
     console.log('Connexion')
     try{
@@ -292,41 +318,48 @@ app.post('/utilisateur', async(req,res) =>{
 
 // Route pour la connexion
 app.post('/login', async (req, res) => {
-    const password = req.body.mdp;
-    const email = req.body.mail;
-    // Hash the password using bcrypt
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Veuillez saisir une adresse e-mail et un mot de passe.' });
-    }
-  
-    try {
-      const conn = await mariadb.pool.getConnection();
-      const rows = await conn.query('SELECT * FROM compte WHERE MailCompte = ?', [email]);
-      conn.release();
-  
-      if (rows.length > 0) {
-        const user = rows[0];
-        const match = await bcrypt.compare(password, hashedPassword);
-  
-        if (match) {
-          const token = jwt.sign({ sub: user.id }, 'secret_key');
-          req.session.idUser = user.IdCompte; // On stocke l'id de l'utilisateur dans la session
-          
-          console.log("session = " + req.session.idUser);
-          return res.json({ message: 'Connexion réussie !', token });
-        } else {
-          return res.status(401).json({ message: 'Adresse e-mail ou mot de passe incorrect.' });
-        }
+  const password = req.body.mdp;
+  const email = req.body.mail;
+  // Hasher le mot de passe en utilisant bcrypt
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Veuillez saisir une adresse e-mail et un mot de passe.' });
+  }
+
+  try {
+    const conn = await mariadb.pool.getConnection();
+    const rows = await conn.query('SELECT * FROM compte WHERE MailCompte = ?', [email]);
+    conn.release();
+
+    if (rows.length > 0) {
+      const user = rows[0];
+      const match = await bcrypt.compare(password, user.MdpCompte);
+
+      if (match) {
+        const token = jwt.sign({ sub: user.id }, 'secret_key');
+        req.session.idUser = user.IdCompte; // On stocke l'id de l'utilisateur dans la session
+
+        console.log("session = " + req.session.idUser);
+        return res.json({ message: 'Connexion réussie !', userId: user.IdCompte, token });
       } else {
         return res.status(401).json({ message: 'Adresse e-mail ou mot de passe incorrect.' });
       }
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Erreur lors de la connexion.' });
+    } else {
+      return res.status(401).json({ message: 'Adresse e-mail ou mot de passe incorrect.' });
     }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Erreur lors de la connexion.' });
+  }
 });
+
+app.post('/logout', (req, res) => {
+  // Effacer l'ID de l'utilisateur de la session
+  delete req.session.idUser;
+  res.status(200).json({ message: 'Déconnexion réussie' });
+});
+
 
 // Route modification d'utilisateur
 app.put('/utilisateur/:id', async (req, res) => {
