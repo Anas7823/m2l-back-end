@@ -430,6 +430,12 @@ app.delete('/utilisateur/:id',async(req,res)=>{
     console.log("Serveur à l'écoute");
 })
 
+// Commentez cette ligne pour lancer les tests
+
 app.listen(8000, () =>{
     console.log("Serveur à l'écoute");
 } )
+
+// app.listen() // Décommentez cette ligne pour lancer les tests
+
+module.exports = app
